@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <curses.h>
+#include <stdlib.h>
+#include <time.h>
 
 
 #define MAP_WIDTH 40
@@ -95,8 +97,8 @@ void draw_snack()
 
 void init_food()
 {
-    g_food.x = 4;
-    g_food.y = 5;
+    g_food.x = rand() % MAP_HEIGHT;
+    g_food.y = rand() % MAP_WIDTH;
     g_food.ch = '@';
 }
 
@@ -107,6 +109,9 @@ void draw_food()
 
 void init_game()
 {
+    /* 随机数初始化 */
+    srand((unsigned)time(NULL));
+
     initscr();
 
     /* 获取方向键 */
@@ -124,6 +129,26 @@ void init_game()
     init_food();
 
     draw_food();
+}
+
+/**
+ * @brief 贪吃蛇是否吃到自己
+ *
+ * @return -1吃到自己，0没有
+ */
+int eat_self()
+{
+    //4 a[3] a[2] a[1] a[0]
+    for (int i = 0; i < g_snack_length - 1; i++)
+    {
+        if (g_snack[g_snack_length-1].x == g_snack[i].x
+            && g_snack[g_snack_length-1].y == g_snack[i].y)
+        {
+            return -1;
+        }
+    }
+
+    return 0;
 }
 
 void eat_food(int tail_x, int tail_y)
@@ -148,6 +173,13 @@ void eat_food(int tail_x, int tail_y)
         g_snack[0].x = tail_x;
         g_snack[0].y = tail_y;
         g_snack[0].ch = '*';
+
+        draw_snack();
+
+
+        /* 重新投喂食物 */
+        init_food();
+        draw_food();
     }
 }
 
@@ -204,10 +236,15 @@ void game_loop()
         // 清除蛇的尾巴
         mvaddch(tail_x, tail_y, ' ');
 
+        draw_snack();
+
         /* 吃食物 */
         eat_food(tail_x, tail_y);
 
-        draw_snack();
+        if (eat_self() < 0)
+        {
+            return;
+        }
     }
 }
 
