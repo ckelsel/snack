@@ -2,10 +2,14 @@
 #include <curses.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 
 #define MAP_WIDTH 40
 #define MAP_HEIGHT 12
+
+/* 游戏得分 */
+int g_score = 0;
 
 struct position {
     /* x坐标 */
@@ -114,6 +118,9 @@ void init_game()
 
     initscr();
 
+    /* 让getch不会阻塞 */
+    nodelay(stdscr, TRUE);
+
     /* 获取方向键 */
     keypad(stdscr, TRUE);
 
@@ -180,6 +187,9 @@ void eat_food(int tail_x, int tail_y)
         /* 重新投喂食物 */
         init_food();
         draw_food();
+
+
+        g_score += 10;
     }
 }
 
@@ -203,6 +213,8 @@ int hit_wall()
 
 void game_loop()
 {
+    int last_key = KEY_RIGHT;
+
     while (1)
     {
         int tail_x = g_snack[0].x;
@@ -220,26 +232,35 @@ void game_loop()
         }
 
         int key = getch();
+        if (key < 0)
+        {
+            key = last_key;
+        }
+
         switch (key)
         {
             /* 上 */
             case KEY_UP:
                 g_snack[g_snack_length-1].x -= 1;
+                last_key = KEY_UP;
                 break;
 
             /* 下 */
             case KEY_DOWN:
                 g_snack[g_snack_length-1].x += 1;
+                last_key = KEY_DOWN;
                 break;
 
             /* 左 */
             case KEY_LEFT:
                 g_snack[g_snack_length-1].y -= 1;
+                last_key = KEY_LEFT;
                 break;
 
             /* 右 */
             case KEY_RIGHT:
                 g_snack[g_snack_length-1].y += 1;
+                last_key = KEY_RIGHT;
                 break;
 
             /* 退出 */
@@ -259,20 +280,36 @@ void game_loop()
         /* 吃食物 */
         eat_food(tail_x, tail_y);
 
+        /* 吃到自己 */
         if (eat_self() < 0)
         {
             return;
         }
 
+        /* 撞墙 */
         if (hit_wall() < 0)
         {
             return;
         }
+
+        // 延时
+        // 0 100ms
+        // 10 90ms
+        // 20 80ms
+        usleep(100*1000 - g_score * 1000);
     }
 }
 
 void game_score()
 {
+    clear();
+    printw("-----------------------------\n");
+    printw(" Score: %d\n", g_score);
+    printw("-----------------------------\n");
+    printw("Press any key to exit\n");
+
+    nodelay(stdscr, FALSE);
+    getch();
     endwin();
 }
 
