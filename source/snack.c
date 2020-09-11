@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include "score.h"
 
 
 #define MAP_WIDTH 40
@@ -58,6 +59,7 @@ void draw_map()
         }
     }
 
+    printw("High Score: %d\n", read_score());
     printw("Copyright (C) xie kunming\n");
     printw("2020-9-11\n");
     printw("Arrow Up,Down,Left,Right\n");
@@ -302,6 +304,8 @@ void game_loop()
 
 void game_score()
 {
+    write_score(g_score);
+
     clear();
     printw("-----------------------------\n");
     printw(" Score: %d\n", g_score);
