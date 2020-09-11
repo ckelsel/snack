@@ -183,6 +183,24 @@ void eat_food(int tail_x, int tail_y)
     }
 }
 
+/**
+ * @brief 撞墙gg
+ *
+ * @return gg if return -1
+ */
+int hit_wall()
+{
+    if (g_snack[g_snack_length-1].x < 0
+        || g_snack[g_snack_length-1].y < 0
+        || g_snack[g_snack_length-1].x >= MAP_HEIGHT
+        || g_snack[g_snack_length-1].y > MAP_WIDTH)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
 void game_loop()
 {
     while (1)
@@ -242,6 +260,11 @@ void game_loop()
         eat_food(tail_x, tail_y);
 
         if (eat_self() < 0)
+        {
+            return;
+        }
+
+        if (hit_wall() < 0)
         {
             return;
         }
