@@ -16,6 +16,9 @@ struct position {
     char ch;
 };
 
+/* 食物 */
+struct position g_food;
+
 /* 贪吃蛇 */
 struct position g_snack[MAP_WIDTH * MAP_HEIGHT];
 
@@ -51,6 +54,8 @@ void draw_map()
 
     printw("Copyright (C) xie kunming\n");
     printw("2020-9-11\n");
+    printw("Arrow Up,Down,Left,Right\n");
+    printw("Press q to exit\n");
 }
 
 /**
@@ -88,6 +93,18 @@ void draw_snack()
     }
 }
 
+void init_food()
+{
+    g_food.x = 4;
+    g_food.y = 5;
+    g_food.ch = '@';
+}
+
+void draw_food()
+{
+    mvaddch(g_food.x, g_food.y, g_food.ch);
+}
+
 void init_game()
 {
     initscr();
@@ -103,6 +120,35 @@ void init_game()
     init_snack();
 
     draw_snack();
+
+    init_food();
+
+    draw_food();
+}
+
+void eat_food(int tail_x, int tail_y)
+{
+    // (0,1),(0,2),(0,3)  (0,4)
+    // (0,2),(0,3),(0,4)
+    // (0,2),(0,3),(0,4),(x,x)
+    // (x,x),(0,2),(0,3),(0,4)
+    // (0,1),(0,2),(0,3),(0,4)
+    if (g_snack[g_snack_length-1].x == g_food.x
+        && g_snack[g_snack_length-1].y == g_food.y)
+    {
+        g_snack_length += 1;
+
+        for (int i = g_snack_length-1; i>0; i--)
+        {
+            g_snack[i].x = g_snack[i-1].x;
+            g_snack[i].y = g_snack[i-1].y;
+            g_snack[i].ch = g_snack[i-1].ch;
+        }
+
+        g_snack[0].x = tail_x;
+        g_snack[0].y = tail_y;
+        g_snack[0].ch = '*';
+    }
 }
 
 void game_loop()
@@ -157,6 +203,9 @@ void game_loop()
 
         // 清除蛇的尾巴
         mvaddch(tail_x, tail_y, ' ');
+
+        /* 吃食物 */
+        eat_food(tail_x, tail_y);
 
         draw_snack();
     }
