@@ -213,6 +213,20 @@ int hit_wall()
     return 0;
 }
 
+void snack_move()
+{
+    // (x,y)
+    // (0,0),(0,1),(0,2),(0,3)
+    // (0,1),(0,2),(0,3)(0,3)
+    // (0,1),(0,2),(0,3)(0,4)
+    /* 移动蛇的身子，不包括头结点 */
+    for (int i = 0; i < g_snack_length - 1; i++)
+    {
+        g_snack[i].x = g_snack[i+1].x;
+        g_snack[i].y = g_snack[i+1].y;
+    }
+}
+
 void game_loop()
 {
     int last_key = KEY_RIGHT;
@@ -222,16 +236,6 @@ void game_loop()
         int tail_x = g_snack[0].x;
         int tail_y = g_snack[0].y;
 
-        // (x,y)
-        // (0,0),(0,1),(0,2),(0,3)
-        // (0,1),(0,2),(0,3)(0,3)
-        // (0,1),(0,2),(0,3)(0,4)
-        /* 移动蛇的身子，不包括头结点 */
-        for (int i = 0; i < g_snack_length - 1; i++)
-        {
-            g_snack[i].x = g_snack[i+1].x;
-            g_snack[i].y = g_snack[i+1].y;
-        }
 
         int key = getch();
         if (key < 0)
@@ -243,24 +247,28 @@ void game_loop()
         {
             /* 上 */
             case KEY_UP:
+                snack_move();
                 g_snack[g_snack_length-1].x -= 1;
                 last_key = KEY_UP;
                 break;
 
             /* 下 */
             case KEY_DOWN:
+                snack_move();
                 g_snack[g_snack_length-1].x += 1;
                 last_key = KEY_DOWN;
                 break;
 
             /* 左 */
             case KEY_LEFT:
+                snack_move();
                 g_snack[g_snack_length-1].y -= 1;
                 last_key = KEY_LEFT;
                 break;
 
             /* 右 */
             case KEY_RIGHT:
+                snack_move();
                 g_snack[g_snack_length-1].y += 1;
                 last_key = KEY_RIGHT;
                 break;
